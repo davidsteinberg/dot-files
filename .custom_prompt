@@ -125,14 +125,14 @@ prompt() {
 
     local prompt=$1
 
-	# Break out the parentheses pieces
-	# Save them, and replace them with placeholder in the string
-	# Remove space from remaining string
+    # Break out the parentheses pieces
+    # Save them, and replace them with placeholder in the string
+    # Remove space from remaining string
 
     local parenPieces=$(echo "${prompt}" | grep -o "([^)]*)")
     prompt=$(echo "${prompt}" | sed "s:([^)]*):__|__:g" | sed "s: *::g")
 
-	# Replace parentheses pieces one by one, without parentheses
+    # Replace parentheses pieces one by one, without parentheses
 
     for parenPiece in $parenPieces; do
         parenPiece=$(echo "${parenPiece}" | sed "s:(\([^)]*\)):\1:g")
@@ -140,7 +140,7 @@ prompt() {
         prompt=$(echo "${prompt}" | sed "s:__|__:$parenPiece:")
     done
 
-	# Replace colors and constants
+    # Replace colors and constants
 
     prompt=$(echo $prompt | sed ":^$:d:" | \
     perl -e "
@@ -214,7 +214,7 @@ prompt() {
         print \$result;
     ")
 
-	# End Color (in case)
+    # End Color (in case)
 
     prompt=$prompt"\\e[0m"
 
