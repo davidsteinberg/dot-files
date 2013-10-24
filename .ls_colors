@@ -1,6 +1,6 @@
-#-----------------
+#--------------------
 # LS Colors
-#-----------------
+#--------------------
 
 #
 # Customize lines 11 - 21
@@ -30,9 +30,9 @@ Dir not sticky : Blue            on Brown
 # 3. The order of each line must be --> {file type} : {foreground color} on {background color}
 #
 
-#-----------------
+#--------------------
 # File Types
-#-----------------
+#--------------------
 
 #    Directory
 #    Sym link       (Symbolic link)
@@ -47,9 +47,9 @@ Dir not sticky : Blue            on Brown
 #    Dir not sticky (Directory writable to others, without sticky bit)
 #
 
-#-----------------
+#--------------------
 # Colors
-#-----------------
+#--------------------
 
 #    Default Color
 #    [Bold] Black
@@ -61,9 +61,9 @@ Dir not sticky : Blue            on Brown
 #    [Bold] Cyan
 #    [Bold] LightGray
 
-#-----------------
+#--------------------
 # The Code
-#-----------------
+#--------------------
 
 # Convert a named color to the letter that represents it
 
@@ -118,68 +118,82 @@ LSFileTypes=(
     "dirnotsticky"
 )
 
-LSColorsArray=()
+#--------------------
+# LS Color Default
+#--------------------
 
-# For each line in the LSColors text block
+lscolorDefault() {
 
-IFS=$'\n'$'\r'
-for line in $LSFileColors; do
+    local LSColorsArray=()
 
-    # Pluck out its file type and foreground and background colors
+    # For each line in the LSColors text block
 
-    fileType=$(echo "${line}" | sed "s/^ *\([a-zA-Z][a-zA-Z \N]*\) *:.*$/\1/" | sed "s: *::g" | sed "y:ABCDEFGHIJKLMNOPQRSTUVWXYZ:abcdefghijklmnopqrstuvwxyz:")
-    colorString=$(echo "${line}" | sed "s/^.*: *\([a-zA-Z][a-zA-Z \N]*\) *on *\([a-zA-Z][a-zA-Z \N]*\)$/\1\2/" | sed "s: *::g")
+    IFS_Backup=$IFS
+    IFS=$'\n'$'\r'
+    for line in $LSFileColors; do
 
-    if [ -z "${fileType}" ]; then
-        continue
-    fi
-    
-    # Store the colors in the appropriate position in output
-    
-    for t in "${!LSFileTypes[@]}"; do
-        if [ "${LSFileTypes[t]}" = "${fileType}" ]; then
-            LSColorsArray[$t]="${colorString}"
-            break
+        # Pluck out its file type and foreground and background colors
+
+        local fileType=$(echo $line | sed "s/^ *\([a-zA-Z][a-zA-Z \N]*\) *:.*$/\1/" | sed "s: *::g" | sed "y:ABCDEFGHIJKLMNOPQRSTUVWXYZ:abcdefghijklmnopqrstuvwxyz:")
+        local colorString=$(echo $line | sed "s/^.*: *\([a-zA-Z][a-zA-Z \N]*\) *on *\([a-zA-Z][a-zA-Z \N]*\)$/\1\2/" | sed "s: *::g")
+
+        if [ -z $fileType ]; then
+            continue
+        fi
+
+        # Store the colors in the appropriate position in output
+
+        for t in "${!LSFileTypes[@]}"; do
+            if [ "${LSFileTypes[t]}" = "${fileType}" ]; then
+                LSColorsArray[$t]="${colorString}"
+                break
+            fi
+        done
+    done
+    IFS=$IFS_Backup
+
+    local LSColorsExport=""
+
+    # For each type of file (aka position in the output)
+
+    for f in "${!LSFileTypes[@]}"; do
+
+        # Convert and add the colors that are there
+
+        if [ "${LSColorsArray[f]}" ]; then
+            convertedColors="${LSColorsArray[f]}"
+
+            LSColorsExport="${LSColorsExport}"$(colorNameToLetter $convertedColors)
+        
+        # Add the default color if nothing is specified
+
+        else
+            LSColorsExport="${LSColorsExport}xx"
         fi
     done
-done
 
-LSColorsExport=""
+    export LSCOLORS=$LSColorsExport
+}
 
-# For each type of file (aka position in the output)
-
-for f in "${!LSFileTypes[@]}"; do
-
-    # Convert and add the colors that are there
-
-    if [ "${LSColorsArray[f]}" ]; then
-        convertedColors="${LSColorsArray[f]}"
-
-        LSColorsExport="${LSColorsExport}"$(colorNameToLetter $convertedColors)
-        
-    # Add the default color if nothing is specified
-
-    else
-        LSColorsExport="${LSColorsExport}xx"
-    fi
-done
-
-export LSCOLORS=$LSColorsExport
-
-#-----------------
+#--------------------
 # LS Color Live
-#-----------------
+#--------------------
 
 lscolor() {
 
     # In case it wasn't before,
       export CLICOLOR=1
 
-    # Report usage error if needed
-    
+    # Set ls color defaults or report usage error if one arg
+
     if [ $# -eq 1 ]; then
-        echo "Usage: lscolor [<file type> <foreground color> [<background color>]]"
-        return
+        if [ $1 = "default" ]; then
+            lscolorDefault
+            return
+        else
+            echo "Usage: lscolor default OR lscolor [<file type> <foreground color> [<background color>]]"
+            return
+        fi
     fi
 
     # Get the existing LSCOLORS
@@ -238,3 +252,7 @@ lscolor() {
     
     export LSCOLORS=$LSColors
 }
+
+# Set ls color defaults
+
+lscolor default

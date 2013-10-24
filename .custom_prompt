@@ -123,27 +123,37 @@ prompt() {
         return
     fi
 
-    local prompt=$1
+    local input=$1
+    
+    if [ "$input" = "default" ]; then    
+        input=$(echo "$CustomPrompt" | grep ".")
+        prompt "$input"
+        return
+    fi
 
     # Break out the parentheses pieces
     # Save them, and replace them with placeholder in the string
     # Remove space from remaining string
 
-    local parenPieces=$(echo "${prompt}" | grep -o "([^)]*)")
-    prompt=$(echo "${prompt}" | sed "s:([^)]*):__|__:g" | sed "s: *::g")
-
+    local parenPieces=$(echo "$input" | grep -o "([^)]*)")
+    
+    input=$(echo "$input" | sed "s:([^)]*):__|__:g" | sed "s: *::g")
+    
     # Replace parentheses pieces one by one, without parentheses
 
+    IFS_Backup=$IFS
+    IFS=$'\n'$'\r'
+
     for parenPiece in $parenPieces; do
-        parenPiece=$(echo "${parenPiece}" | sed "s:(\([^)]*\)):\1:g")
-        parenPiece=$(echo "${parenPiece}" | sed "s/:/\\\:/g")
-        prompt=$(echo "${prompt}" | sed "s:__|__:$parenPiece:")
+        parenPiece=$(echo "$parenPiece" | sed "s:(\([^)]*\)):\1:" | sed "s/:/\\\:/g")
+        input=$(echo "$input" | sed "s:__|__:$parenPiece:")
     done
+
+    IFS=$IFS_Backup
 
     # Replace colors and constants
 
-    prompt=$(echo $prompt | sed ":^$:d:" | \
-    perl -e "
+    input=$(echo "$input" | perl -e "
         my \$result = <STDIN>;
         for (\$result) {
             s:bold\s*black:\\e[1;30m:gi;
@@ -216,11 +226,11 @@ prompt() {
 
     # End Color (in case)
 
-    prompt=$prompt"\\e[0m"
+    input=$input"\\e[0m"
 
-    export PS1=$prompt
+    export PS1=$input
 }
 
-# Set the prompt with the custom innards
+# Set the prompt to the default up top
 
-prompt "${CustomPrompt}"
+prompt default
