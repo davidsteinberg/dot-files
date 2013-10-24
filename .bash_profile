@@ -14,12 +14,6 @@ source "${HOME}/.custom_prompt"
 alias prn='nano ~/.bash_profile' # go ahead, make fun of nano :)
 alias prs='source ~/.bash_profile'
 
-alias ncol='nano ~/.ls_colors'
-alias scol='source ~/.ls_colors'
-
-alias nprt='nano ~/.custom_prompt'
-alias sprt='source ~/.custom_prompt'
-
 alias su='sudo '
 alias ..='cd ..'
 alias trash='rm -r ~/.Trash/*;'
