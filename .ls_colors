@@ -9,7 +9,7 @@
 LSFileColors='
 
 Directory      : Bold Cyan       on Default Color
-Sym link       : Bold Light Gray      on Default Color
+Sym link       : Bold Light Gray on Default Color
 Socket         : Bold Brown      on Default Color
 Pipe           : Bold Magenta    on Default Color
 Executable     : Bold Green      on Default Color
