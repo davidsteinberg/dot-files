@@ -1,0 +1,226 @@
+#-----------------
+# Custom Prompt
+#-----------------
+
+#
+# Customize line 11
+#
+
+CustomPrompt='
+
+Bold White (Current Dir : )
+
+'
+
+#
+# 1. You can freely mix constants with literal text inside parentheses
+#
+# 2. Whitespace matters inside parentheses, except within constants (ex: AmIRoot == Am I Root)
+#
+# 3. Colors can be put anywhere outside of quotes
+#
+# 4. Whitespace does not matter outside of quotes
+#
+# 5. Case does not matter (ex: amiROOT == AmIRoot)
+#
+# 6. Color is automatically stopped for you at the end of the prompt
+#
+
+#-----------------
+# Foreground
+#-----------------
+
+#
+#    [Bold] Black
+#    [Bold] Blue
+#    [Bold] Cyan
+#    [Bold] Green
+#    [Bold] Purple
+#    [Bold] Red
+#    [Bold] White
+#    [Bold] Yellow
+#
+
+#-----------------
+# Background
+#-----------------
+
+#
+#    BG Black
+#    BG Blue
+#    BG Cyan
+#    BG Green
+#    BG Purple
+#    BG Red
+#    BG White
+#    BG Yellow
+#
+
+#-----------------
+# End Color
+#-----------------
+
+#
+#    End Color
+#
+
+#-----------------
+# Constants
+#-----------------
+
+#
+#    Am I Root
+#
+#    Backslash
+#
+#    Bash Release Version Path
+#    Bash Version
+#
+#    Begin Control Sequence
+#
+#    Bell Character
+#
+#    Carriage Return
+#
+#    Command Num Of Command
+#
+#    Current Dir
+#    Current Dir Base Name
+#
+#    Current Number Of Jobs
+#
+#    Device Base Name
+#
+#    End Control Sequence
+#
+#    History Num Of Command
+#
+#    Host Name Partial
+#    Host Name
+#
+#    New Line
+#
+#    Shell Name
+#
+#    Time 24 Hour Minute Second
+#    Time 12 Hour Minute Second
+#    Time 24 Hour AM PM
+#    Time 12 Hour AM PM
+#
+#    User Name
+#
+#    Weekday And Date
+#
+
+#-----------------
+# The Code
+#-----------------
+
+prompt() {
+
+    if [ $# -eq 0 ]; then
+        echo "Usage: prompt <your customized prompt>"
+        return
+    fi
+
+    local prompt=$1
+
+	# Break out the parentheses pieces
+	# Save them, and replace them with placeholder in the string
+	# Remove space from remaining string
+
+    local parenPieces=$(echo "${prompt}" | grep -o "([^)]*)")
+    prompt=$(echo "${prompt}" | sed "s:([^)]*):__|__:g" | sed "s: *::g")
+
+	# Replace parentheses pieces one by one, without parentheses
+
+    for parenPiece in $parenPieces; do
+        parenPiece=$(echo "${parenPiece}" | sed "s:(\([^)]*\)):\1:g")
+        parenPiece=$(echo "${parenPiece}" | sed "s/:/\\\:/g")
+        prompt=$(echo "${prompt}" | sed "s:__|__:$parenPiece:")
+    done
+
+	# Replace colors and constants
+
+    prompt=$(echo $prompt | sed ":^$:d:" | \
+    perl -e "
+        my \$result = <STDIN>;
+        for (\$result) {
+            s:bold\s*black:\\e[1;30m:gi;
+            s:bold\s*red:\\e[1;31m:gi;
+            s:bold\s*green:\\e[1;32m:gi;
+            s:bold\s*yellow:\\e[1;33m:gi;
+            s:bold\s*blue:\\e[1;34m:gi;
+            s:bold\s*purple:\\e[1;35m:gi;
+            s:bold\s*cyan:\\e[1;36m:gi;
+            s:bold\s*white:\\e[1;37m:gi;
+
+            s:bg\s*black:\\e[40m:gi;
+            s:bg\s*red:\\e[41m:gi;
+            s:bg\s*green:\\e[42m:gi;
+            s:bg\s*yellow:\\e[43m:gi;
+            s:bg\s*blue:\\e[44m:gi;
+            s:bg\s*purple:\\e[45m:gi;
+            s:bg\s*cyan:\\e[46m:gi;
+            s:bg\s*white:\\e[47m:gi;
+
+            s:black:\\e[0;30m:gi;
+            s:red:\\e[0;31m:gi;
+            s:green:\\e[0;32m:gi;
+            s:yellow:\\e[0;33m:gi;
+            s:blue:\\e[0;34m:gi;
+            s:purple:\\e[0;35m:gi;
+            s:cyan:\\e[0;36m:gi;
+            s:white:\\e[0;37m:gi;
+
+            s:end\s*color:\\e[0m:gi;
+
+            s:bell\s*character:\\\a:gi;
+
+            s:weekday\s*and\s*date:\\\d:gi;
+
+            s:time\s*24\s*hour\s*minute\s*second:\\\t:gi;
+            s:time\s*12\s*hour\s*minute\s*second:\\\T:gi;
+            s:time\s*12\s*hour\s*am\s*pm:\\\@:gi;
+            s:time\s*24\s*hour\s*am\s*pm:\\\A:gi;
+
+            s:host\s*name *partial:\\\h:gi;
+            s:host\s*name:\\\H:gi;
+            s:device\s*base *name:\\\l:gi;
+            s:shell\s*name:\\\s:gi;
+            s:user\s*name:\\\u:gi;
+
+            s:bash\s*version:\\\v:gi;
+            s:bash\s*release\s*version\s*path:\\\V:gi;
+
+            s:current\s*dir:\\\w:gi;
+            s:current\s*dir\s*base\s*name:\\\W:gi;
+
+            s:current\s*num\s*of\s*jobs:\\\j:gi;
+            s:history\s*num\s*of\s*command:\\\!:gi;
+            s:command\s*num\s*of\s*command:\\\#:gi;
+
+            s:am\s*i\s*root:\\\$:gi;
+
+            s:new\s*line:\\\n:gi;
+            s:carriage\s*return:\\\r:gi;
+
+            s:backslash:\\\\:gi;
+
+            s:begin\s*control\s*sequence:\\\[:gi;
+            s:end\s*control\s*sequence:\\\]:gi;
+        }
+        
+        print \$result;
+    ")
+
+	# End Color (in case)
+
+    prompt=$prompt"\\e[0m"
+
+    export PS1=$prompt
+}
+
+# Set the prompt with the custom innards
+
+prompt "${CustomPrompt}"
