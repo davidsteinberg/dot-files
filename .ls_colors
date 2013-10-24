@@ -65,7 +65,7 @@ Dir not sticky : Blue            on Brown
 # The Code
 #-----------------
 
-# Convert a named color the letter that represents it
+# Convert a named color to the letter that represents it
 
 colorNameToLetter() {
     if [ $# -eq 0 ]; then
@@ -227,7 +227,7 @@ lscolor() {
     
     # Remove spaces from the string
     
-    LSColors=$(echo "${LSColorCouplets[@]}" | sed "s: ::g")
+    local LSColors=$(echo "${LSColorCouplets[@]}" | sed "s: ::g")
     
     # Catch it if the string has untranslated parts (aka letter count > 22)
     
