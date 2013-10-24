@@ -68,8 +68,8 @@ gitbranch() {
     if [ $# -eq 0 ]; then
         return 1
     fi
-    branches=$(git branch | grep $1)
-    if [ -z $branches ]; then
+    branch=$(git branch | grep $1)
+    if [ -z $branch ]; then
         git checkout -b $1
     else
         git checkout $1
