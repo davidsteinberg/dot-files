@@ -35,7 +35,7 @@ alias gitstat='git status'
 # Add and commit together
 
 gitadd() {
-    git add .
+    git add --all
     if [ $# -eq 0 ]; then
         git commit -am "updated repository"
     else
@@ -56,7 +56,7 @@ gitall() {
     if [ $# -eq 0 ]; then
         gitadd "updated repository"
     else
-        gitadd $1
+        gitadd "$1"
     fi
     gitsync
 }
