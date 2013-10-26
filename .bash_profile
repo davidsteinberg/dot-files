@@ -26,67 +26,22 @@ alias showfiles='defaults write com.apple.Finder AppleShowAllFiles YES; killall 
 alias hidefiles='defaults write com.apple.Finder AppleShowAllFiles NO; killall -HUP Finder'
 
 #-----------------
-# Git Fun
+# Clear
 #-----------------
 
-alias gitnew='git init'
-alias gitstat='git status'
+# Will clear the screen once, or num times if number passed in
 
-# Add and commit together
-
-gitadd() {
-    git add --all
+cl () {
     if [ $# -eq 0 ]; then
-        git commit -am "updated repository"
+        clear
     else
-        git commit -am "$1"
+        num=$1
+        while [ $num -gt 0 ]; do
+            clear
+            ((num -= 1))
+        done
     fi
 }
-
-# Pull and push together
-
-gitsync() {
-    git pull
-    git push
-}
-
-# Add, commit, pull, and push together
-
-gitall() {
-    if [ $# -eq 0 ]; then
-        gitadd "updated repository"
-    else
-        gitadd "$1"
-    fi
-    gitsync
-}
-
-# Make a branch if it doesn't exist
-# Checkout the branch
-
-gitbranch() {
-    if [ $# -eq 0 ]; then
-        git branch
-        return
-    fi
-    branch=$(git branch | grep $1)
-    if [ -z "$branch" ]; then
-        git checkout -b $1
-    elif [ $(echo "$branch" | grep ^[^*]) ]; then
-        git checkout $1
-    fi
-}
-
-# Branch to master
-# Merge then delete current branch
-
-gitpheonix() {
-    branchName=$(git branch | grep \* | sed "s:\* ::")
-    gitbranch master
-    git merge $branchName
-    git branch -d $branchName
-}
-alias gitpx='gitpheonix'
 
 #-----------------
 # Directory Fun
@@ -167,19 +122,71 @@ rmd() {
 }
 
 #-----------------
-# Clear
+# Git Fun
 #-----------------
 
-# Will clear the screen once, or num times if number passed in
+alias gitnew='git init'
+alias gitstat='git status'
 
-cl () {
+# Add and commit together
+
+gitadd() {
+    git add --all
     if [ $# -eq 0 ]; then
-        clear
+        git commit -am "updated repository"
     else
-        num=$1
-        while [ $num -gt 0 ]; do
-            clear
-            ((num -= 1))
-        done
+        git commit -am "$1"
     fi
 }
+
+# Pull and push together
+
+gitsync() {
+    git pull
+    git push
+}
+
+# Add, commit, pull, and push together
+
+gitall() {
+    if [ $# -eq 0 ]; then
+        gitadd "updated repository"
+    else
+        gitadd "$1"
+    fi
+    gitsync
+}
+
+# Make a branch if it doesn't exist
+# Checkout the branch
+
+gitbranch() {
+    if [ $# -eq 0 ]; then
+        git branch
+        return
+    fi
+    branch=$(git branch | grep $1)
+    if [ -z "$branch" ]; then
+        git checkout -b $1
+    elif [ $(echo "$branch" | grep ^[^*]) ]; then
+        git checkout $1
+    fi
+}
+
+# Branch to master
+# Merge then delete current branch
+# If -a flag passed, do a gitall after branch to master
+
+gitpheonix() {
+    branchName=$(git branch | grep ^\* | sed "s:\* ::")
+    gitbranch master
+    git merge $branchName
+    git branch -d $branchName
+    
+    if [ $# -eq 1 -a $1 = "-a" ]; then
+        lastCommit=$(git log --name-status HEAD^..HEAD | grep "^\s\{4\}"  | head -n 1 | sed "s:^ *::")
+        gitall "$lastCommit"
+    fi
+}
+alias gitpx='gitpheonix'
+alias gitpxa='gitpheonix -a'
