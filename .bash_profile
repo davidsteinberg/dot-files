@@ -66,15 +66,27 @@ gitall() {
 
 gitbranch() {
     if [ $# -eq 0 ]; then
-        return 1
+        git branch
+        return
     fi
     branch=$(git branch | grep $1)
-    if [ -z $branch ]; then
+    if [ -z "$branch" ]; then
         git checkout -b $1
-    else
+    elif [ $(echo "$branch" | grep ^[^*]) ]; then
         git checkout $1
     fi
 }
+
+# Branch to master
+# Merge then delete current branch
+
+gitpheonix() {
+    branchName=$(git branch | grep \* | sed "s:\* ::")
+    gitbranch master
+    git merge $branchName
+    git branch -d $branchName
+}
+alias gitpx='gitpheonix'
 
 #-----------------
 # Directory Fun
