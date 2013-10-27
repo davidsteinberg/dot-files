@@ -128,6 +128,14 @@ rmd() {
 alias gitnew='git init'
 alias gitstat='git status'
 
+# Get the last commit message
+
+gitlastcommit() {
+	lastCommit=$(git log --name-status HEAD^..HEAD | grep "^\s\{4\}"  | head -n 1 | sed "s:^ *::")
+	echo "$lastCommit"
+}
+alias gitlc='gitlastcommit'
+
 # Add and commit together
 
 gitadd() {
@@ -184,7 +192,7 @@ gitpheonix() {
     git branch -d $branchName
     
     if [ $# -eq 1 -a $1 = "-a" ]; then
-        lastCommit=$(git log --name-status HEAD^..HEAD | grep "^\s\{4\}"  | head -n 1 | sed "s:^ *::")
+        lastCommit=gitlastcommit
         gitall "$lastCommit"
     fi
 }
