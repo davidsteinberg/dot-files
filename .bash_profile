@@ -131,7 +131,7 @@ alias gitstat='git status'
 # Add and commit together
 
 gitadd() {
-    git add --all
+    git add --all :/
     if [ $# -eq 0 ]; then
         git commit -am "updated repository"
     else
