@@ -138,7 +138,7 @@ alias gitlc='gitlastcommit'
 
 # Add and commit together
 
-gitadd() {
+gitcommit() {
     git add --all :/
     if [ $# -eq 0 ]; then
         git commit -am "updated repository"
@@ -146,6 +146,7 @@ gitadd() {
         git commit -am "$1"
     fi
 }
+alias gitcom='gitcommit'
 
 # Pull and push together
 
@@ -158,9 +159,9 @@ gitsync() {
 
 gitall() {
     if [ $# -eq 0 ]; then
-        gitadd "updated repository"
+        gitcommit "updated repository"
     else
-        gitadd "$1"
+        gitcommit "$1"
     fi
     gitsync
 }
